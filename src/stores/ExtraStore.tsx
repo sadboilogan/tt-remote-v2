@@ -2,30 +2,26 @@ import { WsData } from '../types/main';
 import { Dispatch, useReducer } from 'react';
 import { CleanChatItem } from '../types/chat';
 
-const initialState = {
+export const initialExtraState = {
   messages: []
 };
 
-interface ExtraData {
+export interface ExtraData {
   messages?: CleanChatItem[]
 }
 
-interface ExtraReducer {
+export interface ExtraReducerData {
   type: string,
   payload?: ExtraData
 }
 
-function ExtraReducer(state, action: ExtraReducer) {
+export function ExtraReducer(state, action: ExtraReducerData) {
   switch (action.type) {
   case 'set':
     return { ...state, ...action.payload };
   case 'reset':
-    return { initialState };
+    return { initialExtraState };
   default:
     throw new Error();
   }
-}
-
-export function useExtraReducer(): [extra: ExtraData, reducer: Dispatch<ExtraReducer>] {
-  return useReducer(ExtraReducer, initialState);
 }

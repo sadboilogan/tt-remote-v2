@@ -1,18 +1,26 @@
-import { useExtraReducer } from '../stores/ExtraStore';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ChatItem, CleanChatItem } from '../types/chat';
 import { colorize, parseChat } from '../libs/chat';
-import { useScriptReducer } from '../stores/ScriptStore';
 import injectCode from '../libs/helpers';
-import { Text } from '@geist-ui/react';
+import { Checkbox, Divider, Text } from '@geist-ui/react';
 import { useCliContext } from '../contexts/ClientContext';
+import { useScriptContext } from '../contexts/ScriptContext';
+import { useExtraContext } from '../contexts/ExtraContext';
 
 export default function Chat() {
-  const [extra, setExtra] = useExtraReducer();
+  const [extra, setExtra] = useExtraContext();
   const [cli] = useCliContext();
-  const [scripts] = useScriptReducer();
+  const [scripts] = useScriptContext();
+  const [filters, setFilters] = useState(['system', 'misc', 'chat', 'company', 'faction']);
+  const [filteredMsg, setFilteredMsg] = useState([]);
 
-  console.log(cli);
+  const updateFilters = (e?: any) => {
+    if (e) setFilters(e);
+    const msg = extra.messages.filter((msg) => (
+      msg.channels.some((f) => (e || filters).includes(f))
+    ));
+    setFilteredMsg(msg);
+  };
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -42,26 +50,45 @@ export default function Chat() {
       executionContextId: scr.executionContextId
     });
 
-    await injectCode('nui://chat/html/App.js', 81, 'this.messages.push(message);chatMessages(JSON.stringify(this.messages));');
+    await injectCode(cli, scripts,'nui://chat/html/App.js', 81, 'this.messages.push(message);chatMessages(JSON.stringify(this.messages));');
 
-    await Runtime.evaluate({
-      expression: 'fetch(\'http://chat/chatResult\', {method: \'POST\', body: \'{"message":"/code","channel":"Chat"}\'})'
-    });
+    setTimeout(() => {
+      Runtime.evaluate({
+        expression: 'fetch(\'http://chat/chatResult\', {method: \'POST\', body: \'{"message":"/code","channel":"Chat"}\'})'
+      });
+    }, 2500);
+
+    updateFilters();
+
   }, []);
 
   return (
-    <div style={{ height: 500, width: '100%', overflow: 'auto', display: 'flex', flexDirection: 'column-reverse' }}>
-      {extra.messages.length === 0 && (<Text>It's pretty silent around here... check back in a bit!</Text>)}
-      {extra.messages.map((msg) => {
-        return (
-          <div key={Math.random() * 2123}>
-            <Text style={{ marginTop: 5, marginBottom: 5 }}>
-              <div dangerouslySetInnerHTML={{ __html: colorize(msg.author) }} style={{ color: `rgb(${msg.colour})` }}/>
-              <div dangerouslySetInnerHTML={{ __html: colorize(msg.msg) }} />
-            </Text>
-          </div>
-        );
-      })}
+    <div>
+      {extra.messages.length > 0 && (
+        <div>
+          <Checkbox.Group onChange={updateFilters} value={['system', 'misc', 'chat', 'company', 'faction']} style={{ marginTop: 10 }}>
+            <Checkbox value="system">System</Checkbox>
+            <Checkbox value="misc">Misc</Checkbox>
+            <Checkbox value="chat">General</Checkbox>
+            <Checkbox value="company">Company</Checkbox>
+            <Checkbox value="faction">Faction</Checkbox>
+          </Checkbox.Group>
+          <Divider/>
+        </div>
+      )}
+      <div style={{ height: 500, width: '100%', overflow: 'auto', display: 'flex', flexDirection: 'column-reverse' }}>
+        {extra.messages.length === 0 && (<Text>It's pretty silent around here... check back in a bit!</Text>)}
+        {filteredMsg.map((msg) => {
+          return (
+            <div key={Math.random() * 2123}>
+              <Text style={{ marginTop: 5, marginBottom: 5 }}>
+                <span dangerouslySetInnerHTML={{ __html: colorize(msg.author + ' ') }} style={{ color: `rgb(${msg.colour})` }}/>
+                <span dangerouslySetInnerHTML={{ __html: colorize(msg.msg) }} />
+              </Text>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

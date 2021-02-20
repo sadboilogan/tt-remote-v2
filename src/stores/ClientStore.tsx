@@ -1,7 +1,7 @@
 import { WsData } from '../types/main';
 import { Dispatch, useReducer } from 'react';
 
-const initialState: WsData = {
+export const initialClientState: WsData = {
   connected:  false,
   connecting: false,
   valid:      false,
@@ -15,17 +15,13 @@ export interface ClientReducer {
   payload?: WsData,
 }
 
-function CliReducer(state, action: ClientReducer) {
+export function CliReducer(state, action: ClientReducer) {
   switch (action.type) {
   case 'set':
     return { ...state, ...action.payload };
   case 'reset':
-    return { initialState };
+    return { initialClientState };
   default:
     throw new Error();
   }
-}
-
-export function useCliReducer(): [cli: WsData, reducer: Dispatch<ClientReducer>] {
-  return useReducer(CliReducer, initialState);
 }

@@ -1,11 +1,7 @@
-import { useCliReducer } from '../stores/ClientStore';
-import { useScriptReducer } from '../stores/ScriptStore';
+import { ScriptObj, WsData } from '../types/main';
 
-export default async function injectCode(script: string, line: number, code: string) {
-  const [scripts] = useScriptReducer();
+export default async function injectCode(cli: WsData, scripts: ScriptObj, script: string, line: number, code: string) {
   if (!scripts?.[script]) return;
-
-  const [cli] = useCliReducer();
 
   const scr = scripts[script];
   const { Debugger } = cli.client;

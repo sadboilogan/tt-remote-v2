@@ -1,24 +1,20 @@
 import { ScriptObj } from '../types/main';
 import { Dispatch, useReducer } from 'react';
 
-const initialState: ScriptObj = {};
+export const initialScriptState: ScriptObj = {};
 
-interface ScriptReducer {
+export interface ScriptReducerData {
   type: string,
   payload?: ScriptObj,
 }
 
-function ScriptReducer(state, action?: ScriptReducer) {
+export function ScriptReducer(state, action?: ScriptReducerData) {
   switch (action.type) {
   case 'set':
     return { ...state, ...action.payload };
   case 'reset':
-    return { initialState };
+    return { initialScriptState };
   default:
     throw new Error();
   }
-}
-
-export function useScriptReducer(): [extra: ScriptObj, reducer: Dispatch<ScriptReducer>] {
-  return useReducer(ScriptReducer, initialState);
 }

@@ -3,14 +3,14 @@ import { Button, Col, Input, Page, Row, Tabs, Text, useToasts } from '@geist-ui/
 import { WsJsonData } from '../types/main';
 import CDP from 'chrome-remote-interface';
 import devtools from 'devtools-protocol';
-import { useScriptReducer } from '../stores/ScriptStore';
 import Chat from '../components/chat';
 import { useCliContext } from '../contexts/ClientContext';
+import { useScriptContext } from '../contexts/ScriptContext';
 
 export default function Home(): ReactElement {
   const [, setToast] = useToasts();
   const [cli, setCli] = useCliContext();
-  const [curScripts, setScripts] = useScriptReducer();
+  const [curScripts, setScripts] = useScriptContext();
 
   if (typeof window !== 'undefined') {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -133,11 +133,8 @@ export default function Home(): ReactElement {
           </Row>
         </Page.Content>
         <Page.Footer>
-          <Row>
-            <Text>Debug: script count: {Object.keys(curScripts).length} {cli.connected ? 'conn' : 'no conn'}</Text>
-          </Row>
           <Row justify="center">
-            <h2>Made with 💖 by logan</h2>
+            <h4>Made with 💖 by logan</h4>
           </Row>
         </Page.Footer>
       </Page>
