@@ -77,8 +77,13 @@ export function parseChat(chat: ChatItem[]): CleanChatItem[] {
       newMsg.author = `[GLOBAL CHAT] ${newMsg?.channels?.[1] ? ` [${newMsg?.channels?.[1].toUpperCase()}]` : ''} ${userText.name}:`;
       newMsg.msg = `${userText.text}`;
     } else if (newMsg?.channels?.[0] === 'system') {
-      newMsg.author = `[SYSTEM] ${newMsg?.channels?.[1] ? ` [${newMsg?.channels?.[1].toUpperCase()}]` : ''}`;
-      newMsg.msg = `${msg.args[0]}`;
+      if (newMsg?.channels?.[1] === 'radio') {
+        newMsg.author = `[SYSTEM] [RADIO] ${msg.args[0]}:`;
+        newMsg.msg = `${msg.args[1]}`;
+      } else {
+        newMsg.author = `[SYSTEM] ${newMsg?.channels?.[1] ? ` [${newMsg?.channels?.[1].toUpperCase()}]` : ''}`;
+        newMsg.msg = `${msg.args[0]}`;
+      }
     } else if (newMsg?.channels?.[0] === 'company') {
       newMsg.author = `[COMPANY] ${msg.args[0]}:`;
       newMsg.msg = `${msg.args[1]}`;

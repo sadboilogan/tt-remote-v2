@@ -11,16 +11,21 @@ export default function Chat() {
   const [extra, setExtra] = useExtraContext();
   const [cli] = useCliContext();
   const [scripts] = useScriptContext();
-  const [filters, setFilters] = useState(['system', 'misc', 'chat', 'company', 'faction']);
+  const [filters, setFilters] = useState(['system', 'chat', 'company', 'faction']);
   const [filteredMsg, setFilteredMsg] = useState([]);
 
   const updateFilters = (e?: any) => {
+    console.log(`Filters: ${e || filters}`);
     if (e) setFilters(e);
     const msg = extra.messages.filter((msg) => (
       msg.channels.some((f) => (e || filters).includes(f))
     ));
     setFilteredMsg(msg);
   };
+
+  useEffect(() => {
+    updateFilters();
+  }, [extra.messages]);
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -52,13 +57,13 @@ export default function Chat() {
 
     await injectCode(cli, scripts,'nui://chat/html/App.js', 81, 'this.messages.push(message);chatMessages(JSON.stringify(this.messages));');
 
-    setTimeout(() => {
+    await setTimeout(() => {
       Runtime.evaluate({
         expression: 'fetch(\'http://chat/chatResult\', {method: \'POST\', body: \'{"message":"/code","channel":"Chat"}\'})'
       });
     }, 2500);
 
-    updateFilters();
+    updateFilters(['system', 'chat', 'company', 'faction']);
 
   }, []);
 
@@ -66,7 +71,7 @@ export default function Chat() {
     <div>
       {extra.messages.length > 0 && (
         <div>
-          <Checkbox.Group onChange={updateFilters} value={['system', 'misc', 'chat', 'company', 'faction']} style={{ marginTop: 10 }}>
+          <Checkbox.Group onChange={updateFilters} value={['system', 'chat', 'company', 'faction']} style={{ marginTop: 10 }}>
             <Checkbox value="system">System</Checkbox>
             <Checkbox value="misc">Misc</Checkbox>
             <Checkbox value="chat">General</Checkbox>
